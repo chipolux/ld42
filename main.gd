@@ -102,7 +102,7 @@ func calculate_totals():
 		total_city += value
 
 func adjust_desires():
-	var rate = max(tiles.size() / 64, 0.01)
+	var rate = max(tiles.size() / 38, 0.01)
 	desired_water += (10 * rate)
 	desired_nature += (8 * rate)
 	desired_food += (6 * rate)
