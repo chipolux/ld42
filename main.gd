@@ -1,6 +1,5 @@
 extends Node
 
-
 onready var paint_panel = get_node("paint_panel")
 onready var world = get_node("world")
 onready var water_bar = get_node("water_bar")
@@ -12,6 +11,7 @@ var tile_size = 100
 var tile_position
 var tiles = {}
 var freeplay = false
+var ending_played = false
 
 var water_counts = {}
 var nature_counts = {}
@@ -33,13 +33,14 @@ var total_city = base_city
 
 func _ready():
 	get_node("timer").connect("timeout", self, "adjust_desires")
+	get_node("thanks_panel").connect("resume", self, "resume_game")
+	get_node("thanks_panel").connect("reset", self, "reset_game")
 	paint_panel.connect("done_painting", self, "painting_finished")
 	water_bar.set_color(paint_panel.WATER)
 	nature_bar.set_color(paint_panel.NATURE)
 	food_bar.set_color(paint_panel.FOOD)
 	city_bar.set_color(paint_panel.CITY)
-	update_progress()
-	start_painting(Vector2(350, 350))
+	reset_game()
 
 func _input(event):
 	if event is InputEventMouseButton and event.is_pressed() and not paint_panel.visible:
@@ -54,6 +55,10 @@ func _input(event):
 		nature_bar.visible = not nature_bar.visible
 		food_bar.visible = not food_bar.visible
 		city_bar.visible = not city_bar.visible
+	if event is InputEventKey and event.pressed and event.scancode == KEY_G:
+		game_over()
+	if event is InputEventKey and event.pressed and event.scancode == KEY_R:
+		reset_game()
 
 func start_painting(position):
 	tile_position = Vector2(floor(position.x / tile_size), floor(position.y / tile_size)) * tile_size
@@ -120,4 +125,30 @@ func update_progress():
 		return game_over()
 
 func game_over():
-	print("game over")
+	if not ending_played:
+		ending_played = true
+		get_tree().set_pause(true)
+		get_node("player").play("end_game")
+
+func resume_game():
+	get_node("earth").hide()
+	get_node("thanks_panel").hide()
+	get_node("camera").position = Vector2(400, 400)
+	get_node("camera").zoom = Vector2(1, 1)
+
+func reset_game():
+	get_node("earth").hide()
+	get_node("thanks_panel").hide()
+	get_node("camera").position = Vector2(400, 400)
+	get_node("camera").zoom = Vector2(1, 1)
+	ending_played = false
+	tiles.clear()
+	water_counts.clear()
+	nature_counts.clear()
+	food_counts.clear()
+	city_counts.clear()
+	for child in world.get_children():
+		child.queue_free()
+	paint_panel.clear_panel()
+	update_progress()
+	start_painting(Vector2(350, 350))
