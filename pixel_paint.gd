@@ -85,7 +85,7 @@ func change_color(color):
 	_update_button(nature_button, NATURE)
 	_update_button(food_button, FOOD)
 	_update_button(city_button, CITY)
-	
+
 func clear_panel():
 	current_color = WATER
 	pixels = {}
@@ -96,6 +96,7 @@ func clear_panel():
 	food_total = 0
 	city_total = 0
 	save_button.disabled = not freeplay and pixels.size() != (ROWS * COLS)
+	update()
 
 func save_image():
 	var image = Image.new()
